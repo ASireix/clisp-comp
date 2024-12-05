@@ -1,0 +1,22 @@
+LABEL g_start
+    PUSH R1
+    PUSH R2
+    LOAD 2 R1
+    ADD R1 R0
+    MOVE R0 R1
+    JSR f_start
+    LOAD 5 R2
+    MUL R0 R2
+    MOVE R0 R1
+    POP R2
+    POP R1
+    RTN
+
+LABEL main
+    LOAD 4 R0
+    JSR g_start
+    STORE R0 RESULT
+    HALT
+
+RESULT:
+    0

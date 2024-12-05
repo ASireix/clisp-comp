@@ -1,0 +1,16 @@
+LABEL f_start
+    PUSH R1
+    LOAD 3 R1
+    ADD R1 R0
+    MOVE R0 R1
+    POP R1
+    RTN
+
+LABEL main
+    LOAD 4 R0
+    JSR f_start
+    STORE R0 RESULT
+    HALT
+
+RESULT:
+    0

@@ -1,0 +1,5 @@
+(defun vm-run (vm)
+  (loop while (vm-running vm)
+        do (let ((instr (mem-read vm (get-register vm 'PC))))
+             (execute-instruction vm instr)
+             (incf (get-register vm 'PC)))))

@@ -8,11 +8,9 @@
 
 (defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
 (print-registers *current-vm*)
-(vm-load '((LOAD (:CONST 10) R0)  ;; Charge 10 dans R0
-           (CMP R0 (:CONST 5))    ;; Compare R0 à 5
-           (JGT 10)               ;; Saute à l’instruction 10 si R0 > 5
-           (HALT)
-           (LOAD (:CONST 42) R1)  ;; Instruction cible : Charge 42 dans R1
-           (HALT)))
+(mem-write *current-vm* 20 10) ;; Écrit 10 à l'adresse 20
+(vm-load '((LOAD 20 R0)         ;; Charge 10 de l'adresse 20 dans R0
+           (ADD (:CONST 5) R0)  ;; Ajoute 5 à R0
+           (HALT)))             ;; Arrête la machine
 (vm-run)
-(print-registers *current-vm*) ;; R1 devrait contenir 42
+(print-registers *current-vm*)

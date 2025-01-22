@@ -4,11 +4,21 @@
 
 (defun vm-load-inst (vm src dest)
   (let ((value (cond
-                 ((eq (first src) :CONST) (second src))   ;; Gestion des constantes
-                 ((numberp src) (mem-read vm src))        ;; Adresse mémoire
-                 (t (get-register vm src)))))            ;; Registre
+                 ((and (listp src) (eq (first src) :CONST)) (second src))  ;; Si c'est une constante
+                 ((numberp src) (mem-read vm src))         ;; Si c'est une adresse mémoire
+                 (t (get-register vm src)))))              ;; Sinon, c'est un registre
     (set-register vm dest value)))
 
+(defun vm-move (vm src dest)
+  "Déplace une valeur d'un registre ou d'une mémoire à un autre registre ou emplacement mémoire."
+  (let ((src-value (cond
+                     ((and (listp src) (eq (first src) :CONST)) (second src))   ;; Gestion des constantes
+                     ((numberp src) (mem-read vm src))        ;; Adresse mémoire
+                     (t (get-register vm src)))))             ;; Registre
+    (cond
+      ((symbolp dest) (set-register vm dest src-value))  ;; Déplacer vers un registre
+      ((numberp dest) (mem-write vm dest src-value))     ;; Déplacer vers une adresse mémoire
+      (t (error "Destination inconnue pour vm-move: ~A" dest)))))
 
 (defun vm-add (vm src dest)
   (let ((src-value (if (and (listp src) (eq (first src) :CONST))
@@ -59,14 +69,8 @@
     (pc-set vm address)))
 
 (defun vm-cmp (vm src dest)
-  (let ((src-value (if (and (listp src) (eq (first src) :CONST))
-                       (second src)
-                       (get-register vm src)))
-        (dest-value (if (and (listp dest) (eq (first dest) :CONST))
-                        (second dest)
-                        (get-register vm dest))))
-    (attr-set vm :cmp (- src-value dest-value))))
-
+  (let ((result (- (get-register vm src) (get-register vm dest))))
+    (attr-set vm :cmp result)))
 
 (defun vm-jsr (vm label)
   (let ((address (etiq-get vm label)))
@@ -115,6 +119,7 @@
         do (let ((instr (mem-read vm (get-register vm 'PC))))
              (case (first instr)
                (LOAD (vm-load-inst vm (second instr) (third instr)))
+               (MOVE (vm-move vm (second instr) (third instr)))
                (STORE (vm-store vm (second instr) (third instr)))
                (ADD (vm-add vm (second instr) (third instr)))
                (SUB (vm-sub vm (second instr) (third instr)))

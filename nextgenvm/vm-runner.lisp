@@ -21,6 +21,7 @@
   (case (first instr)
     (LOAD (vm-load-inst vm (second instr) (third instr)))
     (STORE (vm-store vm (second instr) (third instr)))
+    (MOVE (vm-move vm (second instr) (third instr)))
     (ADD (vm-add vm (second instr) (third instr)))
     (SUB (vm-sub vm (second instr) (third instr)))
     (MUL (vm-mul vm (second instr) (third instr)))

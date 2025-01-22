@@ -3,14 +3,20 @@
     (mem-write vm dest value)))
 
 (defun vm-load-inst (vm src dest)
-  (let ((value (if (numberp src)
-                   (mem-read vm src)
-                   (get-register vm src))))
+  (let ((value (cond
+                 ((eq (first src) :CONST) (second src))   ;; Gestion des constantes
+                 ((numberp src) (mem-read vm src))        ;; Adresse mémoire
+                 (t (get-register vm src)))))            ;; Registre
     (set-register vm dest value)))
 
+
 (defun vm-add (vm src dest)
-  (let ((result (+ (get-register vm src) (get-register vm dest))))
-    (set-register vm dest result)))
+  (let ((src-value (if (and (listp src) (eq (first src) :CONST))
+                       (second src)                    ;; Valeur littérale
+                       (get-register vm src)))         ;; Registre
+        (dest-value (get-register vm dest)))
+    (set-register vm dest (+ src-value dest-value))))
+
 
 (defun vm-sub (vm src dest)
   (let ((result (- (get-register vm src) (get-register vm dest))))
@@ -53,8 +59,14 @@
     (pc-set vm address)))
 
 (defun vm-cmp (vm src dest)
-  (let ((result (- (get-register vm src) (get-register vm dest))))
-    (attr-set vm :cmp result)))
+  (let ((src-value (if (and (listp src) (eq (first src) :CONST))
+                       (second src)
+                       (get-register vm src)))
+        (dest-value (if (and (listp dest) (eq (first dest) :CONST))
+                        (second dest)
+                        (get-register vm dest))))
+    (attr-set vm :cmp (- src-value dest-value))))
+
 
 (defun vm-jsr (vm label)
   (let ((address (etiq-get vm label)))

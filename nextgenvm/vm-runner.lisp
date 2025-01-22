@@ -1,25 +1,61 @@
 (defun vm-run (&key (main nil) (vm *current-vm*))
-  "Lance la machine virtuelle à l'adresse spécifiée ou à la dernière adresse chargée."
-  ;; Définit l'adresse de départ
+  ;"Lance la machine virtuelle à l'adresse spécifiée ou à la dernière adresse chargée."
   (let ((start (or main (get-last-loaded-address vm))))
-    (set-register vm 'PC start)) ;; Initialise le compteur de programme
-  ;; Boucle principale d'exécution
-  (loop while (vm-running vm)
+    (set-register vm 'PC start))
+  (loop while (is-running vm)
         do (let ((instr (mem-read vm (get-register vm 'PC))))
              (execute-instruction vm instr)
-             (increment-register vm 'PC 1))) ;; Passe à l'instruction suivante
-  ;; Retourne la valeur finale du registre R0
+             (increment-register vm 'PC 1)))
   (get-register vm 'R0))
 
 (defun vm-apply (fn vm &rest args)
-  "Applique une fonction fn déjà chargée dans la VM aux arguments args."
-  ;; Charger les arguments dans la pile
+ ; "Applique une fonction fn déjà chargée dans la VM aux arguments args."
   (dolist (arg args)
-    (push vm arg))
-  ;; Définir le PC à la fonction donnée
+    (stack-push vm arg))
   (let ((address (resolve-symbol vm fn)))
-    (set-register vm 'PC address)) ;; Met le PC à l'adresse de la fonction
-  ;; Exécute la machine
+    (set-register vm 'PC address))
   (vm-run :vm vm)
-  ;; Retourne la valeur finale de R0
   (get-register vm 'R0))
+
+(defun execute-instruction (vm instr)
+  (case (first instr)
+    (LOAD (vm-load-inst vm (second instr) (third instr)))
+    (STORE (vm-store vm (second instr) (third instr)))
+    (ADD (vm-add vm (second instr) (third instr)))
+    (SUB (vm-sub vm (second instr) (third instr)))
+    (MUL (vm-mul vm (second instr) (third instr)))
+    (DIV (vm-div vm (second instr) (third instr)))
+    (INCR (vm-incr vm (second instr)))
+    (DECR (vm-decr vm (second instr)))
+    (PUSH (vm-push vm (second instr)))
+    (POP (vm-pop vm (second instr)))
+    (NOP (vm-nop vm))
+    (HALT (vm-halt vm))
+    (JMP (vm-jmp vm (second instr)))
+    (CMP (vm-cmp vm (second instr) (third instr)))
+    (JSR (vm-jsr vm (second instr)))
+    (JGT (vm-jgt vm (second instr)))
+    (JGE (vm-jge vm (second instr)))
+    (JLT (vm-jlt vm (second instr)))
+    (JLE (vm-jle vm (second instr)))
+    (JEQ (vm-jeq vm (second instr)))
+    (JNE (vm-jne vm (second instr)))
+    (TEST (vm-test vm (second instr)))
+    (JNIL (vm-jnil vm (second instr)))
+    (JTRUE (vm-jtrue vm (second instr)))
+    (t (format t "Instruction inconnue: ~A~%" instr))))
+
+(defun chargeur-charge? (vm)
+ ; "Vérifie si le chargeur est chargé dans la VM."
+  (not (null (vm-loaded-code vm))))
+
+(defun get-last-loaded-address (vm)
+ ; "Retourne la dernière adresse chargée dans la mémoire de la VM."
+  (let ((loaded-code (vm-loaded-code vm)))
+    (if loaded-code
+        (1- (length loaded-code))
+        0)))
+
+(defun resolve-symbol (vm fn)
+ ; "Résout un symbole dans la table des symboles de la VM."
+  (gethash fn (vm-symbol-table vm)))

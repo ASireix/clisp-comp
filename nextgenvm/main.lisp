@@ -19,3 +19,67 @@
            (HALT)))
 (vm-run)
 (print-registers *current-vm*)
+
+(defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
+(vm-load '((LOAD (:CONST 10) R0)
+           (LOAD (:CONST 20) R1)
+           (CMP R0 R1)
+           (JGT GREATER)
+           (LOAD (:CONST 100) R2)
+           (JMP END)
+           (LABEL GREATER)
+           (LOAD (:CONST 50) R2)
+           (LABEL END)
+           (HALT)))
+(vm-run)
+(print-registers *current-vm*)
+
+(defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
+(vm-load '((LOAD (:CONST 10) R0)
+           (LOAD (:CONST 20) R1)
+           (CMP R0 R1)
+           (JMP JUMP_LABEL)
+           (LOAD (:CONST 100) R2)
+           (LABEL JUMP_LABEL)
+           (LOAD (:CONST 5) R2)
+           (HALT)))
+(vm-run)
+(print-registers *current-vm*)
+
+(defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
+(vm-load '((LOAD (:CONST 10) R0)
+           (LOAD (:CONST 20) R1)
+           (ADD R0 R1 R2)
+           (HALT)))
+(vm-run)
+(print-registers *current-vm*)
+
+(defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
+(vm-load '((LOAD (:CONST 5) R0)
+           (LOAD (:CONST 10) R1)
+           (CMP R0 R1)
+           (JLT LABEL_ONE)
+           (LOAD (:CONST 100) R2)
+           (JMP END)
+           (LABEL LABEL_ONE)
+           (LOAD (:CONST 50) R2)
+           (LABEL END)
+           (HALT)))
+(vm-run)
+(print-registers *current-vm*)
+
+(defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
+(vm-load '((LOAD (:CONST 5) R0)            ;; Initialiser R0 à 5 (compteur)
+           (LOAD (:CONST 0) R1)            ;; Initialiser R1 à 0 (valeur de comparaison)
+           (LABEL LOOP_START)             ;; Début de la boucle
+           (CMP R0 R1)                    ;; Comparer R0 et R1
+           (JEQ END_LOOP)                 ;; Si R0 == R1, sauter à END_LOOP
+           (DECR R0)         ;; Décrémenter R0
+           (JMP LOOP_START)               ;; Retourner au début de la boucle
+           (LABEL END_LOOP)               ;; Fin de la boucle
+           (LOAD (:CONST 99) R2)          ;; Charger 99 dans R2 après la boucle
+           (HALT)))                       ;; Arrêter la machine
+(vm-run)
+(print-registers *current-vm*)
+
+

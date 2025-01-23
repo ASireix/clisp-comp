@@ -71,8 +71,7 @@
 
 (defun vm-cmp (vm src dest)
   (let* ((src-val (get-register vm src))
-         (dest-val (get-register vm dest))
-         (result (- src-val dest-val)))
+         (dest-val (get-register vm dest)))
     ;; Mettre à jour les drapeaux en fonction de la comparaison
     (attr-set vm 'FLT (< src-val dest-val))  ;; FLT : vrai si src < dest
     (attr-set vm 'FEQ (= src-val dest-val)) ;; FEQ : vrai si src == dest

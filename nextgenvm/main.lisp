@@ -7,13 +7,16 @@
 (load "vm-utils.lisp")
 
 (defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
-(mem-write *current-vm* 20 10)  ;; Écrit 10 à l'adresse 20
-(vm-load '((LOAD (:CONST 20) R0)         ;; Charge 10 de l'adresse 20 dans R0
-           (LOAD (:CONST 10) R0)
-           (MOVE R0 R1)  ;; Ajoute 5 à R0
-           (ADD (:CONST -1) R0)
-           (CMP R0 R1)
-           (CMP R1 R0)
-           (HALT)))             ;; Arrête la machine
+(vm-load '((LOAD (:CONST 10) R0)          ;; Charge 10 dans R0
+           (LOAD (:CONST 20) R1)          ;; Charge 20 dans R1
+           (CMP R0 R1)                    ;; Compare R0 et R1
+           (JLT LESS)              ;; Si R0 < R1, saute à LABEL-LESS
+           (LOAD (:CONST 100) R2)         ;; Sinon, charge 100 dans R2
+           (JMP END)                     ;; Saute à la fin
+           (LABEL LESS)                  ;; LABEL-LESS : si R0 < R1
+           (LOAD (:CONST -1) R2)          ;; Charge -1 dans R2
+           (LABEL END)                         ;; END : fin du programme
+           (HALT)))                       ;; Arrête la machine
+         ;; Arrête la machine
 (vm-run)
 (print-registers *current-vm*)

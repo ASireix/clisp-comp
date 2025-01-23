@@ -41,3 +41,7 @@
 
 (defun increment-register (vm reg value)
   (set-register vm reg (+ (get-register vm reg) value)))
+
+(defun increment-pc (vm value)
+  (pc-set vm (+ (pc-get vm) value))
+)

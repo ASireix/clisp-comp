@@ -1,19 +1,21 @@
 (defun vm-run (&key (main nil) (vm *current-vm*))
   ;"Lance la machine virtuelle à l'adresse spécifiée ou à la dernière adresse chargée."
   (let ((start (or main (get-last-loaded-address vm))))
-    (set-register vm 'PC start))
+    (pc-set vm start))
   (loop while (is-running vm)
-        do (let ((instr (mem-read vm (get-register vm 'PC))))
+        do (let ((instr (mem-read vm (pc-get vm))))
+             (format t "PC: ~A~%" (pc-get vm)) ; Affiche la valeur de 'PC'
              (execute-instruction vm instr)
-             (increment-register vm 'PC 1)))
+             (increment-pc vm 1)))
   (get-register vm 'R0))
+
 
 (defun vm-apply (fn vm &rest args)
  ; "Applique une fonction fn déjà chargée dans la VM aux arguments args."
   (dolist (arg args)
     (stack-push vm arg))
   (let ((address (resolve-symbol vm fn)))
-    (set-register vm 'PC address))
+    (pc-set vm adress))
   (vm-run :vm vm)
   (get-register vm 'R0))
 
@@ -44,6 +46,7 @@
     (TEST (vm-test vm (second instr)))
     (JNIL (vm-jnil vm (second instr)))
     (JTRUE (vm-jtrue vm (second instr)))
+    (LABEL (vm-label vm (second instr)))
     (t (format t "Instruction inconnue: ~A~%" instr))))
 
 (defun chargeur-charge? (vm)

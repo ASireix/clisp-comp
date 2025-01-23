@@ -66,7 +66,10 @@
 
 (defun vm-jmp (vm label)
   (let ((address (etiq-get vm label)))
-    (pc-set vm address)))
+    (if address
+        (pc-set vm address)
+        (error "Étiquette introuvable pour JMP : ~A" label))))
+
 
 (defun vm-cmp (vm src dest)
   (let* ((src-val (get-register vm src))

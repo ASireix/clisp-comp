@@ -21,11 +21,16 @@
 (defun set-running (vm value)
   (setf (vm-running vm) value))
 
-(defun etiq-get (vm label)
-  (gethash label (vm-symbol-table vm)))
-
 (defun etiq-set (vm label address)
+  (format t "Ajout du label ~A à l'adresse ~A~%" label address)
   (setf (gethash label (vm-symbol-table vm)) address))
+
+(defun etiq-get (vm label)
+  (let ((address (gethash label (vm-symbol-table vm))))
+    (unless address
+      (error "Label non trouvé : ~A" label))
+    address))
+
 
 (defun pc-set (vm address)
   (setf (vm-pc vm) address))

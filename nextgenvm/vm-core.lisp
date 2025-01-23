@@ -18,7 +18,7 @@
    :registers (initialize-registers)
    :flags (initialize-flags)
    :pc 0
-   :sp memory-size
+   :sp 0
    :bp memory-size
    :fp memory-size
    :symbol-table (make-hash-table :test 'equal)

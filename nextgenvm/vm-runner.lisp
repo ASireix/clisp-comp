@@ -15,7 +15,7 @@
   (dolist (arg args)
     (stack-push vm arg))
   (let ((address (resolve-symbol vm fn)))
-    (pc-set vm adress))
+    (pc-set vm address))
   (vm-run :vm vm)
   (get-register vm 'R0))
 

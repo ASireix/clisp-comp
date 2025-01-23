@@ -67,8 +67,8 @@
 (defun vm-jmp (vm label)
   (let ((address (etiq-get vm label)))
     (format t "Jump vers ~A (adresse ~A)~%" label address) ;; Trace
-    (pc-set vm address)))
-    
+    (pc-set vm (+ -1 address))))
+
 (defun vm-cmp (vm src dest)
   (let* ((src-val (get-register vm src))
          (dest-val (get-register vm dest))

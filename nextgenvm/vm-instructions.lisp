@@ -69,42 +69,65 @@
     (pc-set vm address)))
 
 (defun vm-cmp (vm src dest)
-  (let ((result (- (get-register vm src) (get-register vm dest))))
-    (attr-set vm :cmp result)))
+  (let* ((src-val (get-register vm src))
+         (dest-val (get-register vm dest))
+         (result (- src-val dest-val)))
+    ;; Mettre à jour les drapeaux en fonction de la comparaison
+    (attr-set vm 'FLT (< src-val dest-val))  ;; FLT : vrai si src < dest
+    (attr-set vm 'FEQ (= src-val dest-val)) ;; FEQ : vrai si src == dest
+    (attr-set vm 'FGT (> src-val dest-val)))) ;; FGT : vrai si src > dest
+    ;;changer les bons drapeaux
 
 (defun vm-jsr (vm label)
   (let ((address (etiq-get vm label)))
     (stack-push vm (pc-get vm))
     (pc-set vm address)))
 
+;;remplacer :cmp par le bon drapeaux
 (defun vm-jge (vm label)
-  (when (>= (attr-get vm :cmp) 0)
+  ;; JGE : Jump si Greater ou Equal (FGT ou FEQ est vrai)
+  (when (or (attr-get vm 'FGT) (attr-get vm 'FEQ))
     (vm-jmp vm label)))
 
 (defun vm-jlt (vm label)
-  (when (< (attr-get vm :cmp) 0)
+  ;; JLT : Jump si Less Than (FLT est vrai)
+  (when (attr-get vm 'FLT)
     (vm-jmp vm label)))
 
 (defun vm-jgt (vm label)
-  (when (> (attr-get vm :cmp) 0)
+  ;; JGT : Jump si Greater Than (FGT est vrai)
+  (when (attr-get vm 'FGT)
     (vm-jmp vm label)))
 
 (defun vm-jle (vm label)
-  (when (<= (attr-get vm :cmp) 0)
+  ;; JLE : Jump si Less ou Equal (FLT ou FEQ est vrai)
+  (when (or (attr-get vm 'FLT) (attr-get vm 'FEQ))
     (vm-jmp vm label)))
 
 (defun vm-jeq (vm label)
-  (when (= (attr-get vm :cmp) 0)
+  ;; JEQ : Jump si Equal (FEQ est vrai)
+  (when (attr-get vm 'FEQ)
     (vm-jmp vm label)))
 
 (defun vm-jne (vm label)
-  (when (/= (attr-get vm :cmp) 0)
+  ;; JNE : Jump si Not Equal (ni FLT ni FGT, donc pas FEQ)
+  (when (not (attr-get vm 'FEQ))
     (vm-jmp vm label)))
 
 (defun vm-test (vm src)
+  ;; TEST : Vérifie si la valeur dans src est zéro ou non
   (if (zerop (get-register vm src))
-      (attr-set vm :cmp 0)
-      (attr-set vm :cmp 1)))
+      (progn
+        ;; Si zéro : définir drapeaux à Equal
+        (attr-set vm 'FLT nil)
+        (attr-set vm 'FEQ t)
+        (attr-set vm 'FGT nil))
+      (progn
+        ;; Sinon : définir drapeaux à Greater (valeur non nulle positive par défaut)
+        (attr-set vm 'FLT nil)
+        (attr-set vm 'FEQ nil)
+        (attr-set vm 'FGT t))))
+
 
 (defun vm-jnil (vm label)
   (when (zerop (get-register vm :R0))

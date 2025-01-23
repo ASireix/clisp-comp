@@ -7,10 +7,13 @@
 (load "vm-utils.lisp")
 
 (defparameter *current-vm* (vm-make :memory-size 1024 :name "Test VM"))
-(print-registers *current-vm*)
-(mem-write *current-vm* 20 10) ;; Écrit 10 à l'adresse 20
-(vm-load '((LOAD 20 R0)         ;; Charge 10 de l'adresse 20 dans R0
-           (ADD (:CONST 5) R0)  ;; Ajoute 5 à R0
+(mem-write *current-vm* 20 10)  ;; Écrit 10 à l'adresse 20
+(vm-load '((LOAD (:CONST 20) R0)         ;; Charge 10 de l'adresse 20 dans R0
+           (LOAD (:CONST 10) R0)
+           (MOVE R0 R1)  ;; Ajoute 5 à R0
+           (ADD (:CONST -1) R0)
+           (CMP R0 R1)
+           (CMP R1 R0)
            (HALT)))             ;; Arrête la machine
 (vm-run)
 (print-registers *current-vm*)

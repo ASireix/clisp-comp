@@ -15,6 +15,7 @@
            (JMP END)
            (LABEL LESS)
            (LOAD (:CONST 8) R2)
+           (LOAD (:CONST 8) R2)
            (LABEL END)
            (HALT)))                       
 (vm-run)

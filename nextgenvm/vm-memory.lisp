@@ -31,7 +31,6 @@
       (error "Label non trouvé : ~A" label))
     address))
 
-
 (defun pc-set (vm address)
   (setf (vm-pc vm) address))
 

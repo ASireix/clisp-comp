@@ -20,6 +20,7 @@
   (get-register vm 'R0))
 
 (defun execute-instruction (vm instr)
+  (format t "Instruction en cour : ~A~%" (first instr))
   (case (first instr)
     (LOAD (vm-load-inst vm (second instr) (third instr)))
     (STORE (vm-store vm (second instr) (third instr)))
